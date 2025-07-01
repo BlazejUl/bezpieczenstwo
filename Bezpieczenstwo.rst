@@ -102,14 +102,9 @@ To najwyższy poziom uprawnień, nadawany roli jako atrybut. Dotyczy całego kla
 
 - `BYPASSRLS` — Omija polityki RLS (Row-Level Security)
 
-Przykład:
 
-::
 
-    CREATE ROLE admin WITH LOGIN SUPERUSER;
-    CREATE ROLE db_creator WITH CREATEDB;
-
-2. Poziom bazy danych
+Poziom bazy danych
 ~~~~~~~~~~
 
 Uprawnienia do konkretnej bazy danych:
@@ -120,14 +115,9 @@ Uprawnienia do konkretnej bazy danych:
 
 - `TEMP` — Możliwość tworzenia tymczasowych tabel
 
-Przykład:
 
-::
 
-    GRANT CONNECT ON DATABASE mydb TO janek;
-    GRANT CREATE ON DATABASE mydb TO analitycy;
-
-3. Poziom schematu
+Poziom schematu
 ~~~~~~~~~~
 
 Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
@@ -136,14 +126,9 @@ Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
 
 - `CREATE` — Pozwala tworzyć obiekty (np. tabele) w schemacie
 
-Przykład:
 
-::
 
-    GRANT USAGE ON SCHEMA public TO grupa_raportowa;
-    GRANT CREATE ON SCHEMA raporty TO janek;
-
-4. Poziom tabeli
+Poziom tabeli
 ~~~~~~~~~~
 
 Uprawnienia do całej tabeli :
@@ -156,8 +141,8 @@ Uprawnienia do całej tabeli :
 
 - `DELETE` — Usuwanie danych
 
-Przykład:
-
+Przykład
+~~~~
 ::
 
     GRANT SELECT, UPDATE ON employees TO hr_team;
