@@ -1,10 +1,10 @@
 Bezpieczeństwo
 =====
-:Autorzy: - Kasia Tarasek
+:Autorzy: - Katarzyna Tarasek
 	  - Błażej Uliasz
          
 
-pg_hba.conf — opis pliku konfiguracyjnego PostgreSQL
+1. pg_hba.conf — opis pliku konfiguracyjnego PostgreSQL
 --------------------
 
 Plik ``pg_hba.conf`` (skrót od *PostgreSQL Host-Based Authentication*) kontroluje, kto może się połączyć z bazą danych PostgreSQL, skąd, i w jaki sposób ma zostać uwierzytelniony.
@@ -82,7 +82,7 @@ Po zmianach w pliku należy przeładować konfigurację PostgreSQL:
     SELECT pg_reload_conf();
 
 
-Uprawnienia użytkownika
+2. Uprawnienia użytkownika
 ---------
 
 PostgreSQL pozwala na bardzo precyzyjne zarządzanie uprawnieniami użytkowników lub roli poprzez wiele poziomów dostępu — od globalnych uprawnień systemowych, przez bazy danych, aż po pojedyncze kolumny w tabelach.
@@ -147,3 +147,169 @@ Przykład
 
     GRANT SELECT, UPDATE ON employees TO hr_team;
     REVOKE DELETE ON employees FROM kontraktorzy;
+
+
+3. Zarządzanie użytkownikami a dane wprowadzone
+-----------------------------------------------
+
+Zarządzanie użytkownikami w PostgreSQL dotyczy tworzenia, usuwania i modyfikowania użytkowników. Sytuacja na którą trzeba tutaj zwrócić uwagę jest usuwanie użytkonika ale pozostawienie danych, które wprowadził. 
+
+Tworzenie i modyfikacja użytkowników
+~~~~~~~~~~
+
+Do tworzenia nowych użytkowników używamy polecenia ``CREATE USER``. Do modyfikowania użytkowników, którzy już istnieją, używamy polecenia ``ALETER USER``:
+
+::
+
+	CREATE USER username WITH PASSWORD 'password';
+	ALTER USER username WITH PASSWORD 'new_password';
+
+Usuwanie użtkowników
+~~~~~~~~~~
+
+Do usuwania użytkowników, używamy polecenia ``DROP USER`:
+
+::
+
+	DROP USER username;
+
+Dane wprowadzone przez uśytkownika np. za pomocą polecenia ``INSERT`` pozostają, nawet jeśli jego konto zostało usunięte.
+
+Usunięcie użytkownika, a dane które posiadał
+~~~~~~~~~~
+
+Po usunięciu używtkonika dane, które posiadał nie są automatycznie usuwane. Dane te pozostają w bazie danych ale stają się "niedostępne" dla tego użytkownika. Aby się ich pozbyć, musi to zrobić użytkownik który ma do nich uprawnienia, korzystając z plecenia ``DROP``.
+
+Usunięcie użytkowników, a obietky
+~~~~~~~~~~
+
+Usuniecie użytkownika, który jest właścicielem obiektów, wygląda inaczej niż przy wcześniejszych danych. Jeżeli użytkownik jest właścicielem jakiegoś obiektu, to jego usunięcie skutkuje błędem:
+::
+	ERROR: role "username" cannot be droped becouse some objects depend on it
+
+Aby zapobiec takim błędom stosujemy poniższe rozwiazanie:
+::
+	REASSIGN OWNED BY username TO nowa_rola;
+	DROP OWNER BY username;
+	DROP ROLE username;
+
+4. Zabezpieczenie połączenia przez SSL/TLS
+------------------------------------------
+
+TLS (Transport Layer Security) i jego poprzednik SSL (Secure Sockets Layer) to kryptograficzne protokoły służące do zabezpieczania połączeń sieciowych. W PostgreSQL służą one do szyfrowania transmisji danych pomiędzy klientem a serwerem, uniemożliwiając podsłuch, modyfikację lub podszywanie się pod jedną ze stron.
+
+Konfiguracja SSL/TLS w PostgreSQL
+~~~~~~~~~~
+
+Konfiguracja serwera: musimy edytować dwa pliki i zrestartować serwer PostgreSQL. Plik ``postgresql.conf``:
+::
+
+	ssl = on
+	ssl_cert_file = 'server.crt'
+	ssl_key_file = 'server.key'
+	ssl_ca_file = 'root.crt'    
+	ssl_min_protocol_version = 'TLSv1.3'  
+
+oraz ''pg_hba.conf'':
+
+::
+
+	hostssl all all 0.0.0.0/0 cert
+
+Generowanie certyfikatów: jeśli nie używamy komercyjnego CA, możemy sami go wygerenować, a pomocą poniższych komend:
+::
+
+	openssl genrsa -out server.key 2048
+	openssl req -new -key server.key -out server.csr
+	openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+Konfiguracja klienta: parametry SSL, których możemy użyć.
+
+- ``sslmode`` - kontroluje wymuszanie i weryfikację SSL (``require``, ``verify-ca``, ``verify-full``)
+
+- ``sslcert`` - ścieżka do certyfikatu klienta (jeśli wymagane uwierzytelnienie certyfikatem)
+
+- ``sslkey`` -	klucz prywatny klienta
+
+- ``sslrootcert`` - certyfikat CA do weryfikacji certyfikatu serwera
+
+Monitorowanie i testowanie SSL/TLS
+~~~~~~~~~~
+
+Sprawdzenie czy połączenie jest szyfrowanie w PostgreSQL wystarczy użyć prostego polecenia ``SELECT ssl_is_used();``. Jeśli jednak chcemy dostać więcej informacji, musimy wpisać poniższe polecenia:
+::
+
+	SELECT datname, usename, ssl, client_addr, application_name, backend_type
+	FROM pg_stat_ssl
+	JOIN pg_stat_activity ON pg_stat_ssl.pid = pg_stat_activity.pid
+	ORDER BY ssl;
+
+Testowanie z poziomu terminala pozwala podejrzeć szczegóły TLS takie jak certyfikaty, wesję protokołu czy użyty szyft. Wpisujemy poniższą komendę:
+::
+	openssl s_client -starttls postgres -connect example.com:5432 -showcerts
+
+
+5. Szyfrowanie danych
+------------------
+
+Szyfrowanie danych w PostgreSQL odgrywa kluczową rolę w zapewnianiu poufności, integralności i ochrony danych przed nieautoryzowanym dostępem. Można je realizować na różnych poziomach: transmisji (in-transit), przechowywania (at-rest) oraz aplikacyjnym.
+
+Szyfrowanie transmisji
+~~~~~~~~~~
+
+Korzystając z technologi SSL/TLS chroni dane przesyłane pomiędzy klientem, a serwerem przed podsłuchiwaniem lub modyfikacją. Wymaga konfiguracji serwera PostgreSQL do obsługi SSL oraz klienci muszą łączyć się przez SSL. 
+
+Szyfrowanie całego dysku
+~~~~~~~~~~
+
+Dane są szyfrowane na poziomie systemu operacyjnego lub warstwy przechowywania. Stosowanymi roziazaniami jest LUKS, BitLocker, szyfrowanie oferowane przez chmury. Zaletami tego szyfrowania jest transparentność dla PostgrSQL i łatwość w implementacji. Wadami za to jest brak selektywnego szyfrowania oraz fakt, że jeśli system jest aktywny to dane są odszyfrowane i dostępne. 
+
+Szyfrowanie na poziomie kolumn z użyciem pgcrypto
+~~~~~~~~~~
+
+Pozwala na szyfrowanie konkretnych kolumn danych. Rozszerzenie to ``pgcrypto``. Funkcje takiego szyfrowania to:
+
+- symetryczne szyfrowanie
+
+::
+
+	SELECT pgp_sym_encrypt('tajne dane', 'haslo');
+	SELECT pgp_sym_decrypt(kolumna::bytea, 'haslo');
+
+
+- asymetryczne szyfrowanie (z uśyciem kluczy publicznych/prywatnych)
+
+- haszowanie
+
+::
+
+	SELECT digest('haslo', 'sha256');
+
+Zaletami tego szyfrowania jest duża elastyczność i selektywne szyfrowanie. Wadami zaś wydajność i konieczność zarządzania kluczami w aplikacji. 
+
+Szyfrowanie na poziomie aplikacji
+~~~~~~~~~~
+
+Dane są szyfrowane przed zapisaniem do bazy danych i odszyfrowywane po odczycie. Używane biblioteki:
+
+- Python – cryptography, pycryptodome,
+
+- Java – javax.crypto, Bouncy Castle,
+
+- JavaScript – crypto, sjcl.
+
+Zaletami jest pełna kontrola nad szyfrowaniem oraz fakt, że dane są chronione nawet w razie włamania do bazy. Wadami zaś trudniejsze wyszukiwanie i indeksowanie, konieczność przeniesienia odpowiedzialności za bezpieczeństwo do aplikacji oraz problemy ze zgodnością przy migracjach danych.
+
+Zarządzanie kluczami szyfrującymi
+~~~~~~~~~~
+Niezależnie od rodzaju szyfrowania, bezpieczne zarządzanie kluczami jest kluczowe dla ochrony danych. Klucze powinny być generowane, przechowywane, dystrybuowane i niszczone w sposób bezpieczny. Potrzebne są do tego odpowiednie narzędzia. Rekomendowanymi narzędziami do bezpiecznego zarządzania kluczami są:
+
+- Sprzętowe moduły bezpieczeństwa (HSM) - Urządzenia te oferują bezpieczne środowisko do generowania, przechowywania i zarządzania kluczami. HSM-y są odporne na fizyczne ataki i zapewniają wysoki poziom bezpieczeństwa. 
+
+- Systemy zarządzania kluczami (KMS) - KMS to oprogramowanie, które centralizuje zarządzanie kluczami, umożliwiając ich bezpieczne przechowywanie, rotację i dystrybucję. 
+
+
+
+- Narzędzia do bezpiecznej komunikacji - Narzędzia takie jak Signal czy WhatsApp oferują szyfrowanie end-to-end, które chroni komunikację przed nieautoryzowanym dostępem. 
+
+- Narzędzia do szyfrowania dysków - Takie jak BitLocker czy FileVault, które pozwalają na zaszyfrowanie całego dysku twardego lub jego partycji. 
