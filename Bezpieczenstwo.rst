@@ -1,7 +1,7 @@
 Bezpieczeństwo
 =====
-:Autorzy: - Kasia Tarasek
-	        - Błażej Uliasz
+:Autorzy: Kasia Tarasek
+	  Błażej Uliasz
          
 
 pg_hba.conf — opis pliku konfiguracyjnego PostgreSQL
