@@ -92,11 +92,15 @@ Poziom systemowy
 
 To najwyższy poziom uprawnień, nadawany roli jako atrybut. Dotyczy całego klastra PostgreSQL:
 
--`SUPERUSER` — Pełna kontrola nad serwerem, obejmuje wszystkie uprawnienia
--`CREATEDB` — Możliwość tworzenia nowych baz danych
--`CREATEROLE` — Tworzenie i zarządzanie rolami/użytkownikami
--`REPLICATION` — Umożliwia replikację danych (logiczna/strumieniowa)
--`BYPASSRLS` — Omija polityki RLS (Row-Level Security)
+- `SUPERUSER` — Pełna kontrola nad serwerem, obejmuje wszystkie uprawnienia
+
+- `CREATEDB` — Możliwość tworzenia nowych baz danych
+
+- `CREATEROLE` — Tworzenie i zarządzanie rolami/użytkownikami
+
+- `REPLICATION` — Umożliwia replikację danych (logiczna/strumieniowa)
+
+- `BYPASSRLS` — Omija polityki RLS (Row-Level Security)
 
 Przykład:
 
@@ -110,9 +114,11 @@ Przykład:
 
 Uprawnienia do konkretnej bazy danych:
 
--`CONNECT` — Pozwala na połączenie z bazą danych
--`CREATE` — Pozwala na tworzenie schematów w tej bazie
--`TEMP` — Możliwość tworzenia tymczasowych tabel
+- `CONNECT` — Pozwala na połączenie z bazą danych
+
+- `CREATE` — Pozwala na tworzenie schematów w tej bazie
+
+- `TEMP` — Możliwość tworzenia tymczasowych tabel
 
 Przykład:
 
@@ -126,8 +132,11 @@ Przykład:
 
 Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
 
--`USAGE` — Umożliwia dostęp do schematu (bez tego SELECT/INSERT nie zadziała)
--`CREATE` — Pozwala tworzyć obiekty (np. tabele) w schemacie
+- `USAGE` — Umożliwia dostęp do schematu (bez tego SELECT/INSERT nie zadziała)
+
+- `CREATE` — Pozwala tworzyć obiekty (np. tabele) w schemacie
+
+Przykład:
 
 ::
 
@@ -139,8 +148,17 @@ Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
 
 Uprawnienia do całej tabeli :
 
--`SELECT` — Odczyt danych
--`INSERT` — Wstawianie danych
--`UPDATE` — Modyfikacja danych
--`DELETE` — Usuwanie danych
+- `SELECT` — Odczyt danych
 
+- `INSERT` — Wstawianie danych
+
+- `UPDATE` — Modyfikacja danych
+
+- `DELETE` — Usuwanie danych
+
+Przykład:
+
+::
+
+    GRANT SELECT, UPDATE ON employees TO hr_team;
+    REVOKE DELETE ON employees FROM kontraktorzy;
