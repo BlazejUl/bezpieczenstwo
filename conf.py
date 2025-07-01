@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Bezpieczeństwo'
-copyright = '2025, Błażej Uliasz, Kasia Tarasek'
-author = 'Błażej Uliasz, Kasia Tarasek'
+copyright = '2025, Błażej Uliasz, Katarzyna Tarasek'
+author = 'Błażej Uliasz, Katarzyna Tarasek'
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
