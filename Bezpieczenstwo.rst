@@ -1,16 +1,16 @@
 Bezpieczeństwo
-=====
+===============
 :Autorzy: - Katarzyna Tarasek
 	  - Błażej Uliasz
          
 
 1. pg_hba.conf — opis pliku konfiguracyjnego PostgreSQL
---------------------
+---------------------------------------------------------
 
 Plik ``pg_hba.conf`` (skrót od *PostgreSQL Host-Based Authentication*) kontroluje, kto może się połączyć z bazą danych PostgreSQL, skąd, i w jaki sposób ma zostać uwierzytelniony.
 
 Format pliku
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 Każdy wiersz odpowiada jednej regule dostępu:
 ::
     <typ>  <baza danych>  <użytkownik>  <adres>  <metoda>  [opcje]
@@ -18,7 +18,7 @@ Każdy wiersz odpowiada jednej regule dostępu:
 Opis elementów:
 
 Znaczenie Elementów
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - ``<typ>`` — Typ połączenia – np. ``local``, ``host``, ``hostssl``, ``hostnossl``
 - ``<baza>`` — Nazwa bazy danych, do której ma być dostęp – konkretna lub ``all``
@@ -28,7 +28,7 @@ Znaczenie Elementów
 - ``[opcje]`` — Opcjonalne dodatkowe parametry (np. ``clientcert=1``)
 
 Typy połączeń
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 - ``local`` — Umożliwia połączenia **lokalne przez Unix socket** (pliki specjalne w systemie plików, np. ``/var/run/postgresql/.s.PGSQL.5432``).  
   Ten tryb jest dostępny **tylko na systemach Unix/Linux** i ignoruje pole ``<adres>``.
 
@@ -42,7 +42,7 @@ Typy połączeń
   Może być używane do rozróżnienia reguł dla klientów z/do SSL i bez SSL.
 
 Metody uwierzytelniania
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - ``trust`` — brak uwierzytelnienia (niezalecane!)
 
 - ``md5`` — Klient musi podać hasło, które jest przesyłane jako skrót MD5.  
@@ -61,7 +61,7 @@ Metody uwierzytelniania
   
 
 Przykładowy wpis
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -71,7 +71,7 @@ Przykładowy wpis
 
 
 Zmiany i przeładowanie
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Po zmianach w pliku należy przeładować konfigurację PostgreSQL:
 
@@ -83,12 +83,12 @@ Po zmianach w pliku należy przeładować konfigurację PostgreSQL:
 
 
 2. Uprawnienia użytkownika
----------
+-----------------------------
 
 PostgreSQL pozwala na bardzo precyzyjne zarządzanie uprawnieniami użytkowników lub roli poprzez wiele poziomów dostępu — od globalnych uprawnień systemowych, przez bazy danych, aż po pojedyncze kolumny w tabelach.
 
 Poziom systemowy
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 To najwyższy poziom uprawnień, nadawany roli jako atrybut. Dotyczy całego klastra PostgreSQL:
 
@@ -105,7 +105,7 @@ To najwyższy poziom uprawnień, nadawany roli jako atrybut. Dotyczy całego kla
 
 
 Poziom bazy danych
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Uprawnienia do konkretnej bazy danych:
 
@@ -118,7 +118,7 @@ Uprawnienia do konkretnej bazy danych:
 
 
 Poziom schematu
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
 
@@ -129,7 +129,7 @@ Schemat (np. `public`) to kontener na tabele, funkcje, typy. Uprawnienia:
 
 
 Poziom tabeli
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Uprawnienia do całej tabeli :
 
@@ -142,7 +142,7 @@ Uprawnienia do całej tabeli :
 - `DELETE` — Usuwanie danych
 
 Przykład
-~~~~
+~~~~~~~~~~~~~~
 ::
 
     GRANT SELECT, UPDATE ON employees TO hr_team;
@@ -150,12 +150,12 @@ Przykład
 
 
 3. Zarządzanie użytkownikami a dane wprowadzone
------------------------------------------------
+--------------------------------------------------
 
 Zarządzanie użytkownikami w PostgreSQL dotyczy tworzenia, usuwania i modyfikowania użytkowników. Sytuacja na którą trzeba tutaj zwrócić uwagę jest usuwanie użytkonika ale pozostawienie danych, które wprowadził. 
 
 Tworzenie i modyfikacja użytkowników
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Do tworzenia nowych użytkowników używamy polecenia ``CREATE USER``. Do modyfikowania użytkowników, którzy już istnieją, używamy polecenia ``ALETER USER``:
 
@@ -165,7 +165,7 @@ Do tworzenia nowych użytkowników używamy polecenia ``CREATE USER``. Do modyfi
 	ALTER USER username WITH PASSWORD 'new_password';
 
 Usuwanie użtkowników
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Do usuwania użytkowników, używamy polecenia ``DROP USER`:
 
@@ -176,12 +176,12 @@ Do usuwania użytkowników, używamy polecenia ``DROP USER`:
 Dane wprowadzone przez uśytkownika np. za pomocą polecenia ``INSERT`` pozostają, nawet jeśli jego konto zostało usunięte.
 
 Usunięcie użytkownika, a dane które posiadał
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Po usunięciu używtkonika dane, które posiadał nie są automatycznie usuwane. Dane te pozostają w bazie danych ale stają się "niedostępne" dla tego użytkownika. Aby się ich pozbyć, musi to zrobić użytkownik który ma do nich uprawnienia, korzystając z plecenia ``DROP``.
 
 Usunięcie użytkowników, a obietky
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Usuniecie użytkownika, który jest właścicielem obiektów, wygląda inaczej niż przy wcześniejszych danych. Jeżeli użytkownik jest właścicielem jakiegoś obiektu, to jego usunięcie skutkuje błędem:
 ::
@@ -194,12 +194,12 @@ Aby zapobiec takim błędom stosujemy poniższe rozwiazanie:
 	DROP ROLE username;
 
 4. Zabezpieczenie połączenia przez SSL/TLS
-------------------------------------------
+--------------------------------------------
 
 TLS (Transport Layer Security) i jego poprzednik SSL (Secure Sockets Layer) to kryptograficzne protokoły służące do zabezpieczania połączeń sieciowych. W PostgreSQL służą one do szyfrowania transmisji danych pomiędzy klientem a serwerem, uniemożliwiając podsłuch, modyfikację lub podszywanie się pod jedną ze stron.
 
 Konfiguracja SSL/TLS w PostgreSQL
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Konfiguracja serwera: musimy edytować dwa pliki i zrestartować serwer PostgreSQL. Plik ``postgresql.conf``:
 ::
@@ -234,7 +234,7 @@ Konfiguracja klienta: parametry SSL, których możemy użyć.
 - ``sslrootcert`` - certyfikat CA do weryfikacji certyfikatu serwera
 
 Monitorowanie i testowanie SSL/TLS
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sprawdzenie czy połączenie jest szyfrowanie w PostgreSQL wystarczy użyć prostego polecenia ``SELECT ssl_is_used();``. Jeśli jednak chcemy dostać więcej informacji, musimy wpisać poniższe polecenia:
 ::
@@ -250,22 +250,22 @@ Testowanie z poziomu terminala pozwala podejrzeć szczegóły TLS takie jak cert
 
 
 5. Szyfrowanie danych
-------------------
+-----------------------
 
 Szyfrowanie danych w PostgreSQL odgrywa kluczową rolę w zapewnianiu poufności, integralności i ochrony danych przed nieautoryzowanym dostępem. Można je realizować na różnych poziomach: transmisji (in-transit), przechowywania (at-rest) oraz aplikacyjnym.
 
 Szyfrowanie transmisji
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Korzystając z technologi SSL/TLS chroni dane przesyłane pomiędzy klientem, a serwerem przed podsłuchiwaniem lub modyfikacją. Wymaga konfiguracji serwera PostgreSQL do obsługi SSL oraz klienci muszą łączyć się przez SSL. 
 
 Szyfrowanie całego dysku
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Dane są szyfrowane na poziomie systemu operacyjnego lub warstwy przechowywania. Stosowanymi roziazaniami jest LUKS, BitLocker, szyfrowanie oferowane przez chmury. Zaletami tego szyfrowania jest transparentność dla PostgrSQL i łatwość w implementacji. Wadami za to jest brak selektywnego szyfrowania oraz fakt, że jeśli system jest aktywny to dane są odszyfrowane i dostępne. 
 
 Szyfrowanie na poziomie kolumn z użyciem pgcrypto
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Pozwala na szyfrowanie konkretnych kolumn danych. Rozszerzenie to ``pgcrypto``. Funkcje takiego szyfrowania to:
 
@@ -288,7 +288,7 @@ Pozwala na szyfrowanie konkretnych kolumn danych. Rozszerzenie to ``pgcrypto``. 
 Zaletami tego szyfrowania jest duża elastyczność i selektywne szyfrowanie. Wadami zaś wydajność i konieczność zarządzania kluczami w aplikacji. 
 
 Szyfrowanie na poziomie aplikacji
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Dane są szyfrowane przed zapisaniem do bazy danych i odszyfrowywane po odczycie. Używane biblioteki:
 
@@ -301,7 +301,7 @@ Dane są szyfrowane przed zapisaniem do bazy danych i odszyfrowywane po odczycie
 Zaletami jest pełna kontrola nad szyfrowaniem oraz fakt, że dane są chronione nawet w razie włamania do bazy. Wadami zaś trudniejsze wyszukiwanie i indeksowanie, konieczność przeniesienia odpowiedzialności za bezpieczeństwo do aplikacji oraz problemy ze zgodnością przy migracjach danych.
 
 Zarządzanie kluczami szyfrującymi
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Niezależnie od rodzaju szyfrowania, bezpieczne zarządzanie kluczami jest kluczowe dla ochrony danych. Klucze powinny być generowane, przechowywane, dystrybuowane i niszczone w sposób bezpieczny. Potrzebne są do tego odpowiednie narzędzia. Rekomendowanymi narzędziami do bezpiecznego zarządzania kluczami są:
 
 - Sprzętowe moduły bezpieczeństwa (HSM) - Urządzenia te oferują bezpieczne środowisko do generowania, przechowywania i zarządzania kluczami. HSM-y są odporne na fizyczne ataki i zapewniają wysoki poziom bezpieczeństwa. 
