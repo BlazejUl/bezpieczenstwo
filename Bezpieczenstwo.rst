@@ -13,7 +13,8 @@ Format pliku
 ~~~~~~~~~~~~~~~~~~~~
 Każdy wiersz odpowiada jednej regule dostępu:
 ::
-    <typ>  <baza danych>  <użytkownik>  <adres>  <metoda>  [opcje]
+
+	<typ>  <baza danych>  <użytkownik>  <adres>  <metoda>  [opcje]
 
 Opis elementów:
 
@@ -164,8 +165,8 @@ Do tworzenia nowych użytkowników używamy polecenia ``CREATE USER``. Do modyfi
 	CREATE USER username WITH PASSWORD 'password';
 	ALTER USER username WITH PASSWORD 'new_password';
 
-Usuwanie użtkowników
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Usuwanie użytkowników
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Do usuwania użytkowników, używamy polecenia ``DROP USER`:
 
@@ -185,10 +186,12 @@ Usunięcie użytkowników, a obietky
 
 Usuniecie użytkownika, który jest właścicielem obiektów, wygląda inaczej niż przy wcześniejszych danych. Jeżeli użytkownik jest właścicielem jakiegoś obiektu, to jego usunięcie skutkuje błędem:
 ::
+
 	ERROR: role "username" cannot be droped becouse some objects depend on it
 
 Aby zapobiec takim błędom stosujemy poniższe rozwiazanie:
 ::
+
 	REASSIGN OWNED BY username TO nowa_rola;
 	DROP OWNER BY username;
 	DROP ROLE username;
@@ -246,6 +249,7 @@ Sprawdzenie czy połączenie jest szyfrowanie w PostgreSQL wystarczy użyć pros
 
 Testowanie z poziomu terminala pozwala podejrzeć szczegóły TLS takie jak certyfikaty, wesję protokołu czy użyty szyft. Wpisujemy poniższą komendę:
 ::
+
 	openssl s_client -starttls postgres -connect example.com:5432 -showcerts
 
 
